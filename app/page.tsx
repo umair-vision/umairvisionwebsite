@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Play, 
   Film, 
@@ -17,14 +17,103 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- New Feature: Mouse Trail Component ---
+// --- Improved Animated Flowing Lines ---
+
+const BackgroundFlow = () => {
+  return (
+    <div className="fixed inset-0 z-[-5] pointer-events-none">
+      <svg className="w-full h-full">
+        <defs>
+          <filter id="lineGlow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <marker
+            id="arrowhead"
+            markerWidth="10"
+            markerHeight="7"
+            refX="9"
+            refY="3.5"
+            orient="auto"
+          >
+            <polygon points="0 0, 10 3.5, 0 7" fill="#FFE600" />
+          </marker>
+        </defs>
+        
+        {/* Array of paths with higher visibility and glow */}
+        {[...Array(8)].map((_, i) => (
+          <motion.path
+            key={i}
+            // Randomized curves that span the screen
+            d={`M ${-200 + (i * 100)} ${200 + (i * 100)} C ${300 + (i * 50)} ${100}, ${600} ${800}, ${1600} ${200 + (i * 50)}`}
+            fill="transparent"
+            stroke="#FFE600"
+            strokeWidth="1.5"
+            strokeDasharray="6 15"
+            filter="url(#lineGlow)"
+            markerEnd={i % 2 === 0 ? "url(#arrowhead)" : ""}
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ 
+              pathLength: [0, 1],
+              opacity: [0, 0.3, 0.3, 0],
+              pathOffset: [0, 1]
+            }}
+            transition={{
+              duration: 12 + (i * 3),
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 1.5
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+// --- Sub-Components ---
+
+const ReelHolder = ({ videoSrc }: { videoSrc: string }) => {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  return (
+    <motion.div 
+      whileHover={{ y: -12, scale: 1.02 }}
+      className="relative group aspect-[9/16] w-full max-w-[300px] mx-auto rounded-[2.5rem] overflow-hidden border border-[#FFE600]/30 shadow-[0_0_20px_rgba(255,230,0,0.15)] hover:shadow-[0_0_40px_rgba(255,230,0,0.4)] hover:border-[#FFE600] transition-all duration-700 bg-[#050505]"
+    >
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        autoPlay
+        loop
+        muted={isMuted}
+        playsInline
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 pointer-events-none" />
+      
+      <button 
+        onClick={() => setIsMuted(!isMuted)}
+        className="absolute bottom-8 right-6 z-20 p-2 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 hover:bg-[#FFE600] hover:text-black transition-all duration-300 text-white/90"
+      >
+        {isMuted ? <Zap size={14} /> : <Zap size={14} fill="currentColor" />}
+      </button>
+
+      <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none" />
+    </motion.div>
+  );
+};
 
 const MouseTrail = () => {
   const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const newPoint = { x: e.clientX, y: e.clientY, id: Date.now() };
-    setTrail((prev) => [...prev.slice(-15), newPoint]); // Keeps the last 15 points for the trail
+    setTrail((prev) => [...prev.slice(-15), newPoint]); 
   }, []);
 
   useEffect(() => {
@@ -35,7 +124,7 @@ const MouseTrail = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999]">
       <AnimatePresence>
-        {trail.map((point, i) => (
+        {trail.map((point) => (
           <motion.div
             key={point.id}
             initial={{ opacity: 0.4, scale: 1 }}
@@ -60,8 +149,6 @@ const MouseTrail = () => {
     </div>
   );
 };
-
-// --- Components ---
 
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
   <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl ${className}`}>
@@ -129,7 +216,7 @@ const AnimatedLogo = () => {
   );
 };
 
-// --- Pages ---
+// --- Page Content Components ---
 
 const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
   <motion.div 
@@ -139,15 +226,15 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
     className="pt-32 pb-20 px-6 max-w-7xl mx-auto"
   >
     <div className="text-center mb-32">
-    <div className="relative w-40 h-40 mx-auto mb-8">
-  <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40"></div>
-  <img
-    src="/profile.png"
-    alt="Profile"
-    className="relative w-40 h-40 object-cover rounded-full border-4 border-yellow-400"
-  />
-</div>
-       <motion.div 
+      <div className="relative w-40 h-40 mx-auto mb-8">
+        <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40"></div>
+        <img
+          src="/profile.png"
+          alt="Profile"
+          className="relative w-40 h-40 object-cover rounded-full border-4 border-yellow-400"
+        />
+      </div>
+      <motion.div 
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -187,7 +274,7 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
           onClick={() => setPage('projects')}
           className="flex items-center justify-center gap-2 backdrop-blur-md bg-white/5 border border-white/10 hover:bg-[#FFE600]/10 hover:border-[#FFE600]/30 px-10 py-5 rounded-full font-bold transition-all hover:scale-105 text-white"
         >
-          View Archive <Film size={18} />
+          Samples <Film size={18} />
         </button>
       </motion.div>
     </div>
@@ -205,6 +292,15 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
         </GlassCard>
       ))}
     </div>
+
+    <div className="mb-32">
+      <SectionHeading subtitle="Motion Gallery" title="Viral 9:16 Reels" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <ReelHolder videoSrc="/reel1.mp4" />
+        <ReelHolder videoSrc="/reel2.mp4" />
+        <ReelHolder videoSrc="/reel3.mp4" />
+      </div>
+    </div>
   </motion.div>
 );
 
@@ -212,11 +308,11 @@ const ProjectsPage = () => {
   const [filter, setFilter] = useState('All');
   const projects = [
     { title: "YouTube Style Videos", category: "Gaming", img: "/cyberpunk.png" },
-{ title: "Tutorial Video", category: "Cinematic", img: "/urban.png" },
-{ title: "PR/UGC Videos", category: "Commercial", img: "/streetwear.png" },
-{ title: "Facecam Videos", category: "Music", img: "/nightfall.png" },
-{ title: "Product Videos", category: "Commercial", img: "/tech.png" },
-{ title: "Screecasting Videos", category: "Cinematic", img: "/tokyo.png" },
+    { title: "Tutorial Video", category: "Cinematic", img: "/urban.png" },
+    { title: "PR/UGC Videos", category: "Commercial", img: "/streetwear.png" },
+    { title: "Facecam Videos", category: "Music", img: "/nightfall.png" },
+    { title: "Product Videos", category: "Commercial", img: "/tech.png" },
+    { title: "Screencasting Videos", category: "Cinematic", img: "/tokyo.png" },
   ];
 
   const filteredProjects = filter === 'All' ? projects : projects.filter(p => p.category === filter);
@@ -229,7 +325,6 @@ const ProjectsPage = () => {
       className="pt-32 pb-20 px-6 max-w-7xl mx-auto"
     >
       <SectionHeading subtitle="Success Stories" title="Project Archive" />
-      
       <div className="flex flex-wrap gap-4 mb-12">
         {['All', 'Gaming', 'Cinematic', 'Commercial', 'Music'].map((cat) => (
           <button 
@@ -241,7 +336,6 @@ const ProjectsPage = () => {
           </button>
         ))}
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-white">
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project) => (
@@ -254,22 +348,12 @@ const ProjectsPage = () => {
               className="group relative overflow-hidden rounded-3xl border border-white/5 hover:border-[#FFE600]/30 transition-colors"
             >
               <div className="aspect-video overflow-hidden">
-                <img 
-                  src={project.img} 
-                  alt={project.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" 
-                />
+                <img src={project.img} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
               </div>
-           <div className="absolute inset-0 bg-gradient-to-t from-[#FFE600]/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-  <span className="text-[10px] font-black tracking-widest uppercase bg-white text-black px-2 py-0.5 rounded w-fit mb-2">
-    {project.category}
-  </span>
-  <h3 className="text-xl font-black text-white leading-tight tracking-tighter">
-    {project.title}
-  </h3>
-  <button className="mt-4 flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">
-    View Case Study <ArrowRight size={14} />
-  </button>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#FFE600]/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                <span className="text-[10px] font-black tracking-widest uppercase bg-white text-black px-2 py-0.5 rounded w-fit mb-2">{project.category}</span>
+                <h3 className="text-xl font-black text-white leading-tight tracking-tighter">{project.title}</h3>
+                <button className="mt-4 flex items-center gap-2 text-xs font-black text-white uppercase tracking-widest">View Case Study <ArrowRight size={14} /></button>
               </div>
             </motion.div>
           ))}
@@ -289,65 +373,34 @@ const ContactPage = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
       <div>
         <SectionHeading subtitle="Invest in Vision" title="Scale your brand today." />
-        <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-          High-performance editing is an investment, not an expense. 
-          Let's discuss how we can skyrocket your retention and brand value.
-        </p>
-        
+        <p className="text-gray-400 text-lg mb-8 leading-relaxed">High-performance editing is an investment, not an expense. Let's discuss how we can skyrocket your retention and brand value.</p>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20">
-              <Mail className="text-[#FFE600]" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Secure Line</p>
-              <p className="text-lg font-bold">umairapcoms@gmial.com</p>
-            </div>
+            <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20"><Mail className="text-[#FFE600]" size={20} /></div>
+            <div><p className="text-sm text-gray-500">Secure Line</p><p className="text-lg font-bold">umairapcoms@gmail.com</p></div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20">
-              <Instagram className="text-[#FFE600]" size={20} />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Instagram</p>
-              <p className="text-lg font-bold">@umair_vision</p>
-            </div>
+            <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20"><Instagram className="text-[#FFE600]" size={20} /></div>
+            <div><p className="text-sm text-gray-500">Instagram</p><p className="text-lg font-bold">@umair_vision</p></div>
           </div>
         </div>
       </div>
-
       <GlassCard className="p-8 md:p-12 border-[#FFE600]/10">
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Client Name</label>
-              <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white" placeholder="Enter name" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Email Address</label>
-              <input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white" placeholder="Enter email" />
-            </div>
+            <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Client Name</label><input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white" placeholder="Enter name" /></div>
+            <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Email Address</label><input type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white" placeholder="Enter email" /></div>
           </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Budget Range</label>
-            <select className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white">
-              <option>$500 - $1,500</option>
-              <option>$1,500 - $5,000</option>
-              <option>$5,000+</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Project Details</label>
-            <textarea className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 h-32 focus:border-[#FFE600] outline-none transition-all resize-none text-white" placeholder="Briefly describe your goals..."></textarea>
-          </div>
-          <button className="w-full bg-[#FFE600] text-black hover:bg-[#FFD700] py-4 rounded-xl font-black uppercase tracking-widest transition-all shadow-[0_10px_40px_rgba(255,230,0,0.15)]">
-            Initiate Project
-          </button>
+          <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Budget Range</label><select className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 focus:border-[#FFE600] outline-none transition-all text-white"><option>$500 - $1,500</option><option>$1,500 - $5,000</option><option>$5,000+</option></select></div>
+          <div className="space-y-2"><label className="text-xs font-bold uppercase tracking-widest text-[#FFE600]">Project Details</label><textarea className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 h-32 focus:border-[#FFE600] outline-none transition-all resize-none text-white" placeholder="Briefly describe your goals..."></textarea></div>
+          <button className="w-full bg-[#FFE600] text-black hover:bg-[#FFD700] py-4 rounded-xl font-black uppercase tracking-widest transition-all shadow-[0_10px_40px_rgba(255,230,0,0.15)]">Initiate Project</button>
         </form>
       </GlassCard>
     </div>
   </motion.div>
 );
+
+// --- Root App Component ---
 
 export default function App() {
   const [page, setPage] = useState('home');
@@ -371,8 +424,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#FFE600] selection:text-black overflow-x-hidden">
-      {/* New Feature Added Here */}
       <MouseTrail />
+      
+      {/* Animated Glowing Flow Lines */}
+      <BackgroundFlow />
 
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#FFE600]/10 blur-[150px] rounded-full animate-pulse" />
@@ -382,40 +437,23 @@ export default function App() {
       <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className={`backdrop-blur-xl transition-all duration-500 ${scrolled ? 'bg-white/5 border border-white/10 px-8 py-3 rounded-full' : 'bg-transparent px-0 py-0'} flex justify-between items-center`}>
-            <button onClick={() => setPage('home')} className="group flex items-center">
-              <AnimatedLogo />
-            </button>
-            
+            <button onClick={() => setPage('home')} className="group flex items-center"><AnimatedLogo /></button>
             <div className="hidden md:flex gap-10 text-[10px] font-black tracking-[0.2em] uppercase text-gray-400">
               <button onClick={() => setPage('home')} className={`hover:text-[#FFE600] transition-colors ${page === 'home' ? 'text-[#FFE600]' : ''}`}>Home</button>
               <button onClick={() => setPage('projects')} className={`hover:text-[#FFE600] transition-colors ${page === 'projects' ? 'text-[#FFE600]' : ''}`}>Portfolio</button>
               <button onClick={() => setPage('contact')} className={`hover:text-[#FFE600] transition-colors ${page === 'contact' ? 'text-[#FFE600]' : ''}`}>Consult</button>
             </div>
-
             <div className="hidden md:block">
-              <button 
-                onClick={() => setPage('contact')}
-                className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-black tracking-widest uppercase hover:bg-[#FFE600] transition-all transform hover:scale-105 active:scale-95"
-              >
-                Inquire
-              </button>
+              <button onClick={() => setPage('contact')} className="bg-white text-black px-6 py-2 rounded-full text-[10px] font-black tracking-widest uppercase hover:bg-[#FFE600] transition-all transform hover:scale-105 active:scale-95">Inquire</button>
             </div>
-
-            <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </button>
+            <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>{isMobileMenuOpen ? <X /> : <Menu />}</button>
           </div>
         </div>
       </nav>
 
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className="fixed inset-0 z-[90] bg-[#050505] pt-32 px-10 border-l border-[#FFE600]/20"
-          >
+          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} className="fixed inset-0 z-[90] bg-[#050505] pt-32 px-10 border-l border-[#FFE600]/20">
             <div className="flex flex-col gap-8 text-4xl font-black italic tracking-tighter text-white">
               <button onClick={() => { setPage('home'); setIsMobileMenuOpen(false); }}>Home</button>
               <button onClick={() => { setPage('projects'); setIsMobileMenuOpen(false); }}>Portfolio</button>
@@ -425,11 +463,7 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main>
-        <AnimatePresence mode="wait">
-          {renderPage()}
-        </AnimatePresence>
-      </main>
+      <main><AnimatePresence mode="wait">{renderPage()}</AnimatePresence></main>
 
       <footer className="py-20 px-6 border-t border-white/5 bg-black/50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
