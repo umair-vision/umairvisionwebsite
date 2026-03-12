@@ -13,23 +13,27 @@ import {
   Twitter, 
   Youtube, 
   Menu, 
-  X 
+  X,
+  Volume2,
+  VolumeX 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Improved Animated Flowing Lines ---
+// --- Fixed Background Flowing Lines ---
 
 const BackgroundFlow = () => {
   return (
-    <div className="fixed inset-0 z-[-5] pointer-events-none">
-      <svg className="w-full h-full">
+    <div className="fixed inset-0 z-[-5] pointer-events-none overflow-hidden">
+      <svg 
+        className="w-full h-full" 
+        viewBox="0 0 1600 900" 
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
-          <filter id="lineGlow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
+          <filter id="lineGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
           <marker
             id="arrowhead"
@@ -43,29 +47,27 @@ const BackgroundFlow = () => {
           </marker>
         </defs>
         
-        {/* Array of paths with higher visibility and glow */}
         {[...Array(8)].map((_, i) => (
           <motion.path
             key={i}
-            // Randomized curves that span the screen
-            d={`M ${-200 + (i * 100)} ${200 + (i * 100)} C ${300 + (i * 50)} ${100}, ${600} ${800}, ${1600} ${200 + (i * 50)}`}
+            d={`M ${-100 + (i * 200)} ${900} C ${400 + (i * 100)} ${600}, ${800 - (i * 100)} ${300}, ${1700} ${100 + (i * 50)}`}
             fill="transparent"
             stroke="#FFE600"
-            strokeWidth="1.5"
-            strokeDasharray="6 15"
+            strokeWidth="2"
+            strokeDasharray="10 20"
             filter="url(#lineGlow)"
             markerEnd={i % 2 === 0 ? "url(#arrowhead)" : ""}
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={{ pathLength: 0, pathOffset: 0, opacity: 0 }}
             animate={{ 
-              pathLength: [0, 1],
-              opacity: [0, 0.3, 0.3, 0],
-              pathOffset: [0, 1]
+              pathLength: 1,
+              pathOffset: [0, 1],
+              opacity: [0, 0.4, 0.4, 0]
             }}
             transition={{
-              duration: 12 + (i * 3),
+              duration: 15 + (i * 2),
               repeat: Infinity,
               ease: "linear",
-              delay: i * 1.5
+              delay: i * 2
             }}
           />
         ))}
@@ -98,9 +100,9 @@ const ReelHolder = ({ videoSrc }: { videoSrc: string }) => {
       
       <button 
         onClick={() => setIsMuted(!isMuted)}
-        className="absolute bottom-8 right-6 z-20 p-2 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 hover:bg-[#FFE600] hover:text-black transition-all duration-300 text-white/90"
+        className="absolute bottom-8 right-6 z-20 p-2.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 hover:bg-[#FFE600] hover:text-black transition-all duration-300 text-white/90"
       >
-        {isMuted ? <Zap size={14} /> : <Zap size={14} fill="currentColor" />}
+        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
       </button>
 
       <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none" />
@@ -112,8 +114,8 @@ const MouseTrail = () => {
   const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const newPoint = { x: e.clientX, y: e.clientY, id: Date.now() };
-    setTrail((prev) => [...prev.slice(-15), newPoint]); 
+    const newPoint = { x: e.clientX, y: e.clientY, id: Math.random() };
+    setTrail((prev) => [...prev.slice(-12), newPoint]); 
   }, []);
 
   useEffect(() => {
@@ -128,20 +130,20 @@ const MouseTrail = () => {
           <motion.div
             key={point.id}
             initial={{ opacity: 0.4, scale: 1 }}
-            animate={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 0, scale: 0.2 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.5 }}
             style={{
               position: 'absolute',
               left: point.x,
               top: point.y,
-              width: '8px',
-              height: '8px',
+              width: '10px',
+              height: '10px',
               backgroundColor: '#FFE600',
               borderRadius: '50%',
               transform: 'translate(-50%, -50%)',
               filter: 'blur(4px)',
-              boxShadow: '0 0 10px #FFE600'
+              boxShadow: '0 0 12px #FFE600'
             }}
           />
         ))}
@@ -216,6 +218,83 @@ const AnimatedLogo = () => {
   );
 };
 
+// --- Testimonials Section ---
+
+const TestimonialsSection = () => {
+  const testimonials = [
+    {
+      name: "Alex Carter",
+      role: "YouTube Creator",
+      img: "/client1.jpeg",
+      message: "Umair completely transformed my content. The pacing and storytelling dramatically improved my audience retention."
+    },
+    {
+      name: "Samantha Lee",
+      role: "Brand Manager",
+      img: "/client2.jpeg",
+      message: "Extremely professional editing. The videos look cinematic and polished."
+    },
+    {
+      name: "Lily Brooks",
+      role: "Tech Influencer",
+      img: "/client3.jpeg",
+      message: "My engagement improved immediately. The editing style is modern and high quality."
+    },
+    {
+      name: "Michael Torres",
+      role: "Startup Founder",
+      img: "/client4.jpeg",
+      message: "Outstanding pacing and storytelling. Every edit feels intentional."
+    },
+    {
+      name: "Jessica Wong",
+      role: "Content Strategist",
+      img: "/client5.jpeg",
+      message: "Very clean editing and fast delivery. Highly recommended."
+    },
+    {
+      name: "Ryan Patel",
+      role: "Marketing Consultant",
+      img: "/client6.jpeg",
+      message: "Our marketing videos looked premium after editing. Great work."
+    }
+  ];
+
+  return (
+    <div className="mb-32">
+      <SectionHeading subtitle="Client Feedback" title="What Clients Say" />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {testimonials.map((t, i) => (
+          <GlassCard key={i} className="p-6 hover:border-[#FFE600]/40 transition-all group">
+            <div className="flex items-center gap-4 mb-4">
+              <img
+                src={t.img}
+                alt={t.name}
+                className="w-12 h-12 rounded-full object-cover border border-[#FFE600]"
+              />
+              <div>
+                <h4 className="font-bold text-white text-sm">{t.name}</h4>
+                <p className="text-xs text-gray-400">{t.role}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-1 mb-3">
+              {[...Array(5)].map((_, index) => (
+                <Star key={index} size={16} className="text-[#FFE600]" fill="#FFE600" />
+              ))}
+            </div>
+
+            <p className="text-gray-400 text-sm leading-relaxed">
+              {t.message}
+            </p>
+          </GlassCard>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // --- Page Content Components ---
 
 const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
@@ -227,7 +306,7 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
   >
     <div className="text-center mb-32">
       <div className="relative w-40 h-40 mx-auto mb-8">
-        <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40"></div>
+        <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40 animate-pulse"></div>
         <img
           src="/profile.png"
           alt="Profile"
@@ -237,7 +316,6 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
       <motion.div 
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
         className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#FFE600]/20 bg-[#FFE600]/5 text-xs text-[#FFE600] mb-8 backdrop-blur-sm"
       >
         <span className="w-2 h-2 bg-[#FFE600] rounded-full animate-pulse" />
@@ -246,28 +324,19 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
       <motion.h1 
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
         className="text-6xl md:text-9xl font-black mb-6 tracking-tight leading-[0.9] text-white"
       >
         High-Value <br />
         <span className="bg-gradient-to-r from-[#FFE600] via-[#FFD700] to-[#FFFFFF] bg-clip-text text-transparent italic">Content.</span>
       </motion.h1>
       <motion.p 
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
         className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light"
       >
         Visual storytelling that drives massive engagement. Optimized for the 
         modern digital landscape by <span className="text-[#FFE600] font-bold underline decoration-2 underline-offset-4">umair_vision</span>.
       </motion.p>
-      <motion.div 
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="flex flex-col sm:flex-row gap-4 justify-center"
-      >
-        <button className="flex items-center justify-center gap-2 bg-[#FFE600] text-black px-10 py-5 rounded-full font-black transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,230,0,0.3)]">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <button className="flex items-center justify-center gap-2 bg-[#FFE600] text-black px-10 py-5 rounded-full font-black transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,230,0,0.3)]">
           Watch Showreel <Play size={18} fill="black" />
         </button>
         <button 
@@ -276,7 +345,7 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
         >
           Samples <Film size={18} />
         </button>
-      </motion.div>
+      </div>
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-32">
@@ -301,6 +370,10 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
         <ReelHolder videoSrc="/reel3.mp4" />
       </div>
     </div>
+
+    {/* Integrated Testimonials Section */}
+    <TestimonialsSection />
+    
   </motion.div>
 );
 
@@ -425,8 +498,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#FFE600] selection:text-black overflow-x-hidden">
       <MouseTrail />
-      
-      {/* Animated Glowing Flow Lines */}
       <BackgroundFlow />
 
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
