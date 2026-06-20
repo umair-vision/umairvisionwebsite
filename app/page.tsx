@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Play, 
   Film, 
@@ -13,14 +13,11 @@ import {
   Twitter, 
   Youtube, 
   Menu, 
-  X,
-  Volume2,
-  VolumeX 
+  X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Fixed Background Flowing Lines ---
-
+// --- Background Grid Animation Component ---
 const BackgroundFlow = () => {
   return (
     <div className="fixed inset-0 z-[-5] pointer-events-none overflow-hidden">
@@ -76,40 +73,28 @@ const BackgroundFlow = () => {
   );
 };
 
-// --- Sub-Components ---
-
-const ReelHolder = ({ videoSrc }: { videoSrc: string }) => {
-  const [isMuted, setIsMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
+// --- Optimized Embedded YouTube Reel Component ---
+const ReelHolder = ({ videoId }: { videoId: string }) => {
   return (
     <motion.div 
       whileHover={{ y: -12, scale: 1.02 }}
       className="relative group aspect-[9/16] w-full max-w-[300px] mx-auto rounded-[2.5rem] overflow-hidden border border-[#FFE600]/30 shadow-[0_0_20px_rgba(255,230,0,0.15)] hover:shadow-[0_0_40px_rgba(255,230,0,0.4)] hover:border-[#FFE600] transition-all duration-700 bg-[#050505]"
     >
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        autoPlay
-        loop
-        muted={isMuted}
-        playsInline
-        className="w-full h-full object-cover"
+      <iframe
+        className="w-full h-full object-cover pointer-events-auto"
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1`}
+        title="YouTube Shorts Player"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        frameBorder="0"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 pointer-events-none" />
-      
-      <button 
-        onClick={() => setIsMuted(!isMuted)}
-        className="absolute bottom-8 right-6 z-20 p-2.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 hover:bg-[#FFE600] hover:text-black transition-all duration-300 text-white/90"
-      >
-        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-      </button>
-
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 pointer-events-none" />
       <div className="absolute inset-0 rounded-[2.5rem] border border-white/5 pointer-events-none" />
     </motion.div>
   );
 };
 
+// --- Cursor Tracking Particle Effect ---
 const MouseTrail = () => {
   const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
 
@@ -152,12 +137,14 @@ const MouseTrail = () => {
   );
 };
 
+// --- Glassmorphic UI Card Element ---
 const GlassCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
   <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl ${className}`}>
     {children}
   </div>
 );
 
+// --- Modular Heading Design ---
 const SectionHeading = ({ subtitle, title }: { subtitle: string, title: string }) => (
   <div className="mb-12">
     <motion.span 
@@ -177,6 +164,7 @@ const SectionHeading = ({ subtitle, title }: { subtitle: string, title: string }
   </div>
 );
 
+// --- Dynamic Dynamic Shifting Logo Animation ---
 const AnimatedLogo = () => {
   const [isFull, setIsFull] = useState(true);
 
@@ -219,7 +207,6 @@ const AnimatedLogo = () => {
 };
 
 // --- Testimonials Section ---
-
 const TestimonialsSection = () => {
   const testimonials = [
     {
@@ -295,8 +282,7 @@ const TestimonialsSection = () => {
   );
 };
 
-// --- Page Content Components ---
-
+// --- Page Module 1: Home Segment ---
 const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
   <motion.div 
     initial={{ opacity: 0 }} 
@@ -365,18 +351,17 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
     <div className="mb-32">
       <SectionHeading subtitle="Motion Gallery" title="Viral 9:16 Reels" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        <ReelHolder videoSrc="/reel1.mp4" />
-        <ReelHolder videoSrc="/reel2.mp4" />
-        <ReelHolder videoSrc="/reel3.mp4" />
+        <ReelHolder videoId="Ip3e1GCM_Bw" />
+        <ReelHolder videoId="h6NrKx1hw4c" />
+        <ReelHolder videoId="EkdhwuqC2QU" />
       </div>
     </div>
 
-    {/* Integrated Testimonials Section */}
     <TestimonialsSection />
-    
   </motion.div>
 );
 
+// --- Page Module 2: Portfolio/Projects Segment ---
 const ProjectsPage = () => {
   const [filter, setFilter] = useState('All');
   const projects = [
@@ -436,6 +421,7 @@ const ProjectsPage = () => {
   );
 };
 
+// --- Page Module 3: Contact Segment ---
 const ContactPage = () => (
   <motion.div 
     initial={{ opacity: 0 }} 
@@ -450,7 +436,7 @@ const ContactPage = () => (
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20"><Mail className="text-[#FFE600]" size={20} /></div>
-            <div><p className="text-sm text-gray-500">Secure Line</p><p className="text-lg font-bold">umairapcoms@gmail.com</p></div>
+            <div><p className="text-sm text-gray-500">Email</p><p className="text-lg font-bold">umairapcoms@gmail.com</p></div>
           </div>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20"><Instagram className="text-[#FFE600]" size={20} /></div>
@@ -473,8 +459,7 @@ const ContactPage = () => (
   </motion.div>
 );
 
-// --- Root App Component ---
-
+// --- Root Application Setup ---
 export default function App() {
   const [page, setPage] = useState('home');
   const [scrolled, setScrolled] = useState(false);
@@ -534,7 +519,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <main><AnimatePresence mode="wait">{renderPage()}</AnimatePresence></main>
+      <main>
+        <AnimatePresence mode="wait">
+          {renderPage()}
+        </AnimatePresence>
+      </main>
 
       <footer className="py-20 px-6 border-t border-white/5 bg-black/50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
