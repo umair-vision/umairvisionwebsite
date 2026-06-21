@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Background Grid Animation Component ---
+// --- Background Grid Animation Component (Hidden on Mobile) ---
 const BackgroundFlow = () => {
   return (
-    <div className="fixed inset-0 z-[-5] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-[-5] pointer-events-none overflow-hidden hidden md:block">
       <svg 
         className="w-full h-full" 
         viewBox="0 0 1600 900" 
@@ -94,22 +94,28 @@ const ReelHolder = ({ videoId }: { videoId: string }) => {
   );
 };
 
-// --- Cursor Tracking Particle Effect ---
+// --- Cursor Tracking Particle Effect (Completely Disabled on Mobile/Touch) ---
 const MouseTrail = () => {
   const [trail, setTrail] = useState<{ x: number, y: number, id: number }[]>([]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (typeof window !== 'undefined') {
+      if (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768) return;
+    }
     const newPoint = { x: e.clientX, y: e.clientY, id: Math.random() };
     setTrail((prev) => [...prev.slice(-12), newPoint]); 
   }, []);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768) return;
+    }
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [handleMouseMove]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[9999]">
+    <div className="fixed inset-0 pointer-events-none z-[9999] hidden md:block">
       <AnimatePresence>
         {trail.map((point) => (
           <motion.div
@@ -164,7 +170,7 @@ const SectionHeading = ({ subtitle, title }: { subtitle: string, title: string }
   </div>
 );
 
-// --- Dynamic Dynamic Shifting Logo Animation ---
+// --- Dynamic Shifting Logo Animation ---
 const AnimatedLogo = () => {
   const [isFull, setIsFull] = useState(true);
 
@@ -292,7 +298,7 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
   >
     <div className="text-center mb-32">
       <div className="relative w-40 h-40 mx-auto mb-8">
-        <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40 animate-pulse"></div>
+        <div className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl opacity-40 animate-pulse hidden md:block"></div>
         <img
           src="/profile.png"
           alt="Profile"
@@ -310,13 +316,13 @@ const HomePage = ({ setPage }: { setPage: (p: string) => void }) => (
       <motion.h1 
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="text-6xl md:text-9xl font-black mb-6 tracking-tight leading-[0.9] text-white"
+        className="text-5xl md:text-9xl font-black mb-6 tracking-tight leading-[0.9] text-white"
       >
         High-Value <br />
         <span className="bg-gradient-to-r from-[#FFE600] via-[#FFD700] to-[#FFFFFF] bg-clip-text text-transparent italic">Content.</span>
       </motion.h1>
       <motion.p 
-        className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light"
+        className="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light"
       >
         Visual storytelling that drives massive engagement. Optimized for the 
         modern digital landscape by <span className="text-[#FFE600] font-bold underline decoration-2 underline-offset-4">umair_vision</span>.
@@ -485,7 +491,7 @@ export default function App() {
       <MouseTrail />
       <BackgroundFlow />
 
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none hidden md:block">
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#FFE600]/10 blur-[150px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#FFD700]/5 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
