@@ -40,12 +40,12 @@ const FEATURES = [
 ];
 
 const TESTIMONIALS = [
-  { name: "Alex Carter",      role: "YouTube Creator",     img: "/client1.jpeg", message: "Umair completely transformed my content. The pacing and storytelling dramatically improved my audience retention." },
-  { name: "Samantha Lee",     role: "Brand Manager",       img: "/client2.jpeg", message: "Extremely professional editing. The videos look cinematic and polished." },
-  { name: "Lily Brooks",      role: "Tech Influencer",     img: "/client3.jpeg", message: "My engagement improved immediately. The editing style is modern and high quality." },
-  { name: "Michael Torres",   role: "Startup Founder",     img: "/client4.jpeg", message: "Outstanding pacing and storytelling. Every edit feels intentional." },
+  { name: "Alex Carter",      role: "YouTube Creator",      img: "/client1.jpeg", message: "Umair completely transformed my content. The pacing and storytelling dramatically improved my audience retention." },
+  { name: "Samantha Lee",     role: "Brand Manager",        img: "/client2.jpeg", message: "Extremely professional editing. The videos look cinematic and polished." },
+  { name: "Lily Brooks",      role: "Tech Influencer",      img: "/client3.jpeg", message: "My engagement improved immediately. The editing style is modern and high quality." },
+  { name: "Michael Torres",   role: "Startup Founder",      img: "/client4.jpeg", message: "Outstanding pacing and storytelling. Every edit feels intentional." },
   { name: "Jessica Wong",     role: "Content Strategist",  img: "/client5.jpeg", message: "Very clean editing and fast delivery. Highly recommended." },
-  { name: "Ryan Patel",       role: "Marketing Consultant",img: "/client6.jpeg", message: "Our marketing videos looked premium after editing. Great work." },
+  { name: "Ryan Patel",       role: "Marketing Consultant", img: "/client6.jpeg", message: "Our marketing videos looked premium after editing. Great work." },
 ];
 
 const PROJECTS = [
@@ -288,11 +288,108 @@ const TestimonialsSection = memo(() => (
 TestimonialsSection.displayName = 'TestimonialsSection';
 
 // ---------------------------------------------------------------------------
+// GlowSocialHub Component (With Enhanced Box Sizes & High-Energy Hover Effects)
+// ---------------------------------------------------------------------------
+const GlowSocialHub = memo(() => (
+  <div className="w-full max-w-5xl mx-auto mt-20 text-center space-y-8">
+    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-[11px] font-black tracking-widest uppercase text-gray-400">
+      Instant Dynamic Channels
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left px-4">
+      
+      {/* 1. WHATSAPP BOX - PROMINENT SIZE & SPRING ANIMATED */}
+      <motion.a 
+        href="https://wa.me/923191386775?text=Hi%20Umair,%20I%20want%20to%20collaborate%20on%20a%20video%20project!"
+        target="_blank" 
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.07, y: -8 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        className="relative block rounded-3xl p-[3px] overflow-hidden group transition-all duration-300 shadow-[0_15px_35px_rgba(0,0,0,0.5)] cursor-pointer"
+      >
+        {/* Dynamic Multi-layered High Intensity Light Aura */}
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 via-emerald-300 to-emerald-500 opacity-40 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-[#00FF66] to-emerald-400 animate-[spin_4s_linear_infinite] opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Enhanced Inside Card Content Container */}
+        <div className="relative bg-[#070707] rounded-[21px] p-8 md:p-10 h-full flex flex-col justify-between border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_50px_rgba(16,185,129,0.6)] group-hover:bg-[#0c0c0c] transition-all duration-300">
+          <div>
+            <div className="flex items-center gap-4 mb-5">
+              {/* Oversized WhatsApp SVG Icon Block */}
+              <div className="p-3.5 bg-emerald-500/20 rounded-2xl text-emerald-400 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.4)] group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-300 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.454 5.709 1.455h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+              </div>
+              <span className="text-[11px] font-black tracking-widest text-emerald-400 uppercase bg-emerald-500/5 px-2.5 py-1 rounded-md border border-emerald-500/10">Live Chatroom</span>
+            </div>
+            
+            <h4 className="font-black text-white text-2xl md:text-3xl tracking-tight transition-colors group-hover:text-emerald-300">WhatsApp Messenger</h4>
+            <p className="text-sm text-gray-400 mt-3.5 leading-relaxed font-light">
+              Instantly connect to align fast-paced workflows, review post-production metrics, or secure ongoing creative production retainers directly.
+            </p>
+          </div>
+          
+          <div className="mt-8 pt-5 border-t border-white/10 flex items-center justify-between text-xs font-black text-emerald-400 group-hover:text-emerald-300 uppercase tracking-widest">
+            <span>Ping Creator Now</span>
+            <motion.div variants={{ hover: { x: 5 } }} className="transform transition-transform group-hover:translate-x-2">
+              <ArrowRight size={16} />
+            </motion.div>
+          </div>
+        </div>
+      </motion.a>
+
+      {/* 2. INSTAGRAM BOX - PROMINENT SIZE & SPRING ANIMATED */}
+      <motion.a 
+        href="https://instagram.com/umair_vision" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.07, y: -8 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        className="relative block rounded-3xl p-[3px] overflow-hidden group transition-all duration-300 shadow-[0_15px_35px_rgba(0,0,0,0.5)] cursor-pointer"
+      >
+        {/* Dynamic Multi-layered High Intensity Light Aura */}
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-[#FFE600] to-yellow-300 opacity-40 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFE600] via-yellow-500 to-[#FFFFFF] animate-[spin_4s_linear_infinite] opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Enhanced Inside Card Content Container */}
+        <div className="relative bg-[#070707] rounded-[21px] p-8 md:p-10 h-full flex flex-col justify-between border border-[#FFE600]/30 shadow-[0_0_20px_rgba(255,230,0,0.15)] group-hover:shadow-[0_0_50px_rgba(255,230,0,0.6)] group-hover:bg-[#0c0c0c] transition-all duration-300">
+          <div>
+            <div className="flex items-center gap-4 mb-5">
+              {/* Oversized Instagram Component Block */}
+              <div className="p-3.5 bg-[#FFE600]/20 rounded-2xl text-[#FFE600] border border-[#FFE600]/30 shadow-[0_0_15px_rgba(255,230,0,0.4)] group-hover:scale-110 group-hover:bg-[#FFE600] group-hover:text-black transition-all duration-300 flex items-center justify-center">
+                <Instagram size={28} />
+              </div>
+              <span className="text-[11px] font-black tracking-widest text-[#FFE600] uppercase bg-[#FFE600]/5 px-2.5 py-1 rounded-md border border-[#FFE600]/10">Creative Network</span>
+            </div>
+            
+            <h4 className="font-black text-white text-2xl md:text-3xl tracking-tight transition-colors group-hover:text-yellow-200">@umair_vision</h4>
+            <p className="text-sm text-gray-400 mt-3.5 leading-relaxed font-light">
+              Explore immediate high-fidelity concept drops, motion graphics framework break-downs, and regular short-form design strategies.
+            </p>
+          </div>
+          
+          <div className="mt-8 pt-5 border-t border-white/10 flex items-center justify-between text-xs font-black text-[#FFE600] group-hover:text-yellow-200 uppercase tracking-widest">
+            <span>View Network Portfolio</span>
+            <motion.div className="transform transition-transform group-hover:translate-x-2">
+              <ArrowRight size={16} />
+            </motion.div>
+          </div>
+        </div>
+      </motion.a>
+
+    </div>
+  </div>
+));
+GlowSocialHub.displayName = 'GlowSocialHub';
+
+// ---------------------------------------------------------------------------
 // HomePage
 // ---------------------------------------------------------------------------
 const HomePage = memo(({ setPage }: { setPage: (p: string) => void }) => {
   const goProjects = useCallback(() => setPage('projects'), [setPage]);
-  const goContact  = useCallback(() => setPage('contact'),  [setPage]);
 
   return (
     <motion.div
@@ -327,6 +424,8 @@ const HomePage = memo(({ setPage }: { setPage: (p: string) => void }) => {
           Visual storytelling that drives massive engagement. Optimized for the modern digital landscape by{' '}
           <span className="text-[#FFE600] font-bold underline decoration-2 underline-offset-4">umair_vision</span>.
         </motion.p>
+        
+        {/* Call To Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button className="flex items-center justify-center gap-2 bg-[#FFE600] text-black px-10 py-5 rounded-full font-black transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,230,0,0.3)]">
             Watch Showreel <Play size={18} fill="black" />
@@ -338,6 +437,9 @@ const HomePage = memo(({ setPage }: { setPage: (p: string) => void }) => {
             Samples <Film size={18} />
           </button>
         </div>
+
+        {/* Global Glowing Dynamic Contact Grid Container */}
+        <GlowSocialHub />
       </div>
 
       {/* Features */}
@@ -455,18 +557,24 @@ const ContactPage = memo(() => (
         </p>
         <div className="space-y-6">
           {[
-            { Icon: Mail,      label: "Email",     value: "umairapcoms@gmail.com" },
-            { Icon: Instagram, label: "Instagram", value: "@umair_vision" },
-          ].map(({ Icon, label, value }) => (
-            <div key={label} className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20">
+            { Icon: Mail,      label: "Email",     value: "umairapcoms@gmail.com", href: "mailto:umairapcoms@gmail.com" },
+            { Icon: Instagram, label: "Instagram", value: "@umair_vision", href: "https://instagram.com/umair_vision" },
+          ].map(({ Icon, label, value, href }) => (
+            <a 
+              href={href} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              key={label} 
+              className="flex items-center gap-4 group cursor-pointer w-fit"
+            >
+              <div className="w-12 h-12 rounded-full bg-[#FFE600]/10 flex items-center justify-center border border-[#FFE600]/20 group-hover:border-[#FFE600] transition-colors">
                 <Icon className="text-[#FFE600]" size={20} />
               </div>
               <div>
                 <p className="text-sm text-gray-500">{label}</p>
-                <p className="text-lg font-bold">{value}</p>
+                <p className="text-lg font-bold group-hover:text-[#FFE600] transition-colors">{value}</p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -512,7 +620,7 @@ const ContactPage = memo(() => (
 ContactPage.displayName = 'ContactPage';
 
 // ---------------------------------------------------------------------------
-// Root App
+// Root App Entry Point
 // ---------------------------------------------------------------------------
 export default function App() {
   const [page, setPage] = useState('home');
@@ -525,7 +633,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when page changes
   const navigate = useCallback((p: string) => {
     setPage(p);
     setIsMobileMenuOpen(false);
@@ -545,13 +652,13 @@ export default function App() {
       <MouseTrail />
       <BackgroundFlow />
 
-      {/* Ambient blobs */}
+      {/* Ambient background blur elements */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none hidden md:block">
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#FFE600]/10 blur-[150px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#FFD700]/5 blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Navbar */}
+      {/* Navigation Layer */}
       <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className={`backdrop-blur-xl transition-all duration-500 ${scrolled ? 'bg-white/5 border border-white/10 px-8 py-3 rounded-full' : 'bg-transparent px-0 py-0'} flex justify-between items-center`}>
@@ -559,9 +666,9 @@ export default function App() {
               <AnimatedLogo />
             </button>
 
-            {/* Desktop links */}
+            {/* Viewports Desktop Nav links */}
             <div className="hidden md:flex gap-10 text-sm font-black tracking-[0.15em] uppercase text-gray-400">
-              {(['home', 'projects', 'contact'] as const).map((p, _, arr) => {
+              {(['home', 'projects', 'contact'] as const).map(p => {
                 const labels: Record<string, string> = { home: 'Home', projects: 'Portfolio', contact: 'Consult' };
                 return (
                   <button
@@ -591,7 +698,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -614,12 +721,12 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Page content */}
+      {/* Application Lifecycle Content */}
       <main>
         <AnimatePresence mode="wait">{renderedPage}</AnimatePresence>
       </main>
 
-      {/* Footer */}
+      {/* Global Footer */}
       <footer className="py-20 px-6 border-t border-white/5 bg-black/50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div>
@@ -631,11 +738,20 @@ export default function App() {
             </p>
           </div>
           <div className="flex gap-4 text-white">
-            {[Instagram, Twitter, Youtube].map((Icon, i) => (
-              <button key={i} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-[#FFE600] transition-all">
-                <Icon size={18} />
-              </button>
-            ))}
+            {[Instagram, Twitter, Youtube].map((Icon, i) => {
+              const links = ["https://instagram.com/umair_vision", "#", "#"];
+              return (
+                <a 
+                  key={i} 
+                  href={links[i]} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-[#FFE600] transition-all"
+                >
+                  <Icon size={18} />
+                </a>
+              );
+            })}
           </div>
         </div>
       </footer>
