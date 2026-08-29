@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
+import React, { useState, useRef, memo, useMemo, useEffect } from 'react';
 import {
   Play,
   Film,
@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   Mic,
-  Video,
   CheckCircle,
   Volume2,
   Sparkles,
@@ -87,9 +86,11 @@ const SERVICES_DATA = [
 ];
 
 const VOICEOVER_SAMPLES = [
-  { id: 1, title: "SaaS Commercial Voice Over", style: "Energetic & Modern Tech", duration: "0:45", audioUrl: "/audio/saas-demo.mp3" },
-  { id: 2, title: "Software Product Walkthrough", style: "Clear, Professional & Instructional", duration: "1:10", audioUrl: "/audio/product-walkthrough.mp3" },
-  { id: 3, title: "YouTube Video Essay Narrative", style: "Cinematic & Conversational", duration: "1:30", audioUrl: "/audio/narrative-essay.mp3" }
+  { id: 1, title: "Skyler", style: "Energetic & Modern Tech", defaultDuration: "0:45", audioUrl: "/Skyler.mp3" },
+  { id: 2, title: "Tee", style: "Clear, Professional & Instructional", defaultDuration: "1:10", audioUrl: "/Tee.mp3" },
+  { id: 3, title: "kate", style: "Cinematic & Conversational", defaultDuration: "1:30", audioUrl: "/kate.mp3" },
+  { id: 4, title: "Jane", style: "Commercial & Engaging", defaultDuration: "0:55", audioUrl: "/Jane.mp3" },
+  { id: 5, title: "Maria", style: "Smooth Narrative & Corporate", defaultDuration: "1:15", audioUrl: "/Maria.mp3" }
 ];
 
 const SAAS_SAMPLES = [
@@ -101,8 +102,203 @@ const CATEGORIES = ['All', 'Gaming', 'Cinematic', 'Commercial', 'Music'] as cons
 const REEL_IDS = ["Ip3e1GCM_Bw", "h6NrKx1hw4c", "EkdhwuqC2QU"];
 
 // ---------------------------------------------------------------------------
-// Glossy Top Navigation Bar
+// Voiceover Player Item Component
 // ---------------------------------------------------------------------------
+
+const VoiceoverItem = ({
+  sample,
+  activeAudioId,
+  toggleAudio,
+  handleMetadataLoaded,
+  duration
+}: {
+  sample: typeof VOICEOVER_SAMPLES[number];
+  activeAudioId: number | null;
+  toggleAudio: (id: number) => void;
+  handleMetadataLoaded: (id: number, e: React.SyntheticEvent<HTMLAudioElement, Event>) => void;
+  duration: string;
+}) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  
+  const isPlaying = activeAudioId === sample.id;
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+
+  // Manage Play / Pause safely via standard React effect
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      // Connect Web Audio API lazily on first user interaction
+      if (!audioCtxRef.current) {
+        try {
+          const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+          const ctx = new AudioContextClass();
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 64;
+
+          const source = ctx.createMediaElementSource(audio);
+          source.connect(analyser);
+          analyser.connect(ctx.destination);
+
+          audioCtxRef.current = ctx;
+          analyserRef.current = analyser;
+          sourceRef.current = source;
+        } catch {
+          // Fallback if media source is already connected or restricted
+        }
+      }
+
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+
+      audio.play().catch(err => console.error("Audio playback error:", err));
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying]);
+
+  // Canvas visualizer render loop
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const render = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const numBars = 16;
+      const barGap = 3;
+      const totalGaps = (numBars - 1) * barGap;
+      const barWidth = (width - totalGaps) / numBars;
+
+      if (isPlaying && analyserRef.current) {
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyserRef.current.getByteFrequencyData(dataArray);
+
+        for (let i = 0; i < numBars; i++) {
+          const value = dataArray[i] || 0;
+          const percent = value / 255;
+          const barHeight = Math.max(4, percent * height);
+
+          const x = i * (barWidth + barGap);
+          const y = (height - barHeight) / 2;
+
+          ctx.fillStyle = '#FFE600';
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, barHeight, 2);
+          ctx.fill();
+        }
+      } else {
+        // Muted / Static Waveform bars
+        for (let i = 0; i < numBars; i++) {
+          const barHeight = 4;
+          const x = i * (barWidth + barGap);
+          const y = (height - barHeight) / 2;
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, barHeight, 2);
+          ctx.fill();
+        }
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, [isPlaying]);
+
+  return (
+    <GlassCard className="p-6 flex items-center justify-between">
+      <audio
+        ref={audioRef}
+        src={sample.audioUrl}
+        preload="metadata"
+        onLoadedMetadata={(e) => handleMetadataLoaded(sample.id, e)}
+        onEnded={() => toggleAudio(sample.id)}
+      />
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => toggleAudio(sample.id)}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+            isPlaying ? 'bg-[#FFE600] text-black shadow-[0_0_15px_rgba(255,230,0,0.5)]' : 'bg-white/10 text-white hover:bg-[#FFE600] hover:text-black'
+          }`}
+        >
+          {isPlaying ? <Volume2 size={20} className="animate-pulse" /> : <Play size={20} className="ml-0.5" />}
+        </button>
+        <div>
+          <h4 className="font-bold text-white text-base">{sample.title}</h4>
+          <span className="text-xs text-[#FFE600]">{sample.style}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-6">
+        <canvas
+          ref={canvasRef}
+          width={120}
+          height={28}
+          className="w-[120px] h-[28px] pointer-events-none"
+        />
+        <span className="text-xs font-mono text-gray-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+          {duration}
+        </span>
+      </div>
+    </GlassCard>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Reusable UI Components
+// ---------------------------------------------------------------------------
+
+const GlassCard = memo(({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl ${className}`}>
+    {children}
+  </div>
+));
+GlassCard.displayName = 'GlassCard';
+
+const SectionHeading = memo(({ subtitle, title }: { subtitle: string; title: string }) => (
+  <div className="mb-12">
+    <span className="text-[#FFE600] font-bold text-sm tracking-widest uppercase">{subtitle}</span>
+    <h2 className="text-4xl md:text-5xl font-black mt-2 tracking-tighter text-white">{title}</h2>
+  </div>
+));
+SectionHeading.displayName = 'SectionHeading';
+
+const ReelHolder = memo(({ videoId }: { videoId: string }) => (
+  <div className="relative group aspect-[9/16] w-full max-w-[300px] mx-auto rounded-[2.5rem] overflow-hidden border border-[#FFE600]/30 shadow-[0_0_20px_rgba(255,230,0,0.15)] bg-[#050505]">
+    <iframe
+      className="w-full h-full object-cover"
+      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`}
+      title="YouTube Reel"
+      allow="autoplay; encrypted-media"
+      frameBorder="0"
+    />
+  </div>
+));
+ReelHolder.displayName = 'ReelHolder';
+
+// ---------------------------------------------------------------------------
+// Header Navigation
+// ---------------------------------------------------------------------------
+
 const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: string) => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -117,7 +313,6 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
     <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-8 py-4 pointer-events-none">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
-        {/* Brand Logo Card */}
         <motion.div 
           onClick={() => setPage('home')}
           whileHover={{ scale: 1.03 }}
@@ -132,7 +327,6 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
           </div>
         </motion.div>
 
-        {/* Desktop Glossy Center Pill */}
         <nav className="hidden md:flex pointer-events-auto items-center gap-1 p-1.5 rounded-full bg-black/40 backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -161,7 +355,6 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
           })}
         </nav>
 
-        {/* Action Button */}
         <div className="hidden md:block pointer-events-auto">
           <button
             onClick={() => setPage('contact')}
@@ -173,7 +366,6 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
           </button>
         </div>
 
-        {/* Mobile Toggle Button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden pointer-events-auto p-3 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/15 text-white"
@@ -182,7 +374,6 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
         </button>
       </div>
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -212,13 +403,12 @@ const GlossyTopBar = memo(({ page, setPage }: { page: string; setPage: (p: strin
 GlossyTopBar.displayName = 'GlossyTopBar';
 
 // ---------------------------------------------------------------------------
-// Fixed Bottom Glossy Social Hub
+// Floating Bottom Hub
 // ---------------------------------------------------------------------------
+
 const BottomGlassSocialHub = memo(() => (
   <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-xl pointer-events-auto">
     <div className="p-2 rounded-2xl bg-black/60 backdrop-blur-2xl border border-white/20 shadow-[0_15px_35px_rgba(0,0,0,0.6)] flex items-center justify-between gap-2">
-      
-      {/* WhatsApp Link */}
       <a
         href="https://wa.me/923191386775?text=Hi%20Umair,%20I%20want%20to%20collaborate%20on%20a%20video%20project!"
         target="_blank"
@@ -234,7 +424,6 @@ const BottomGlassSocialHub = memo(() => (
         </div>
       </a>
 
-      {/* Instagram Link */}
       <a
         href="https://instagram.com/umair_vision"
         target="_blank"
@@ -250,7 +439,6 @@ const BottomGlassSocialHub = memo(() => (
         </div>
       </a>
 
-      {/* YouTube Link */}
       <a
         href="https://youtube.com"
         target="_blank"
@@ -265,42 +453,10 @@ const BottomGlassSocialHub = memo(() => (
           <p className="text-xs font-bold text-white group-hover:text-red-400 transition-colors">YouTube</p>
         </div>
       </a>
-
     </div>
   </div>
 ));
 BottomGlassSocialHub.displayName = 'BottomGlassSocialHub';
-
-// ---------------------------------------------------------------------------
-// Card & Heading Layout Elements
-// ---------------------------------------------------------------------------
-const GlassCard = memo(({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl ${className}`}>
-    {children}
-  </div>
-));
-GlassCard.displayName = 'GlassCard';
-
-const SectionHeading = memo(({ subtitle, title }: { subtitle: string; title: string }) => (
-  <div className="mb-12">
-    <span className="text-[#FFE600] font-bold text-sm tracking-widest uppercase">{subtitle}</span>
-    <h2 className="text-4xl md:text-5xl font-black mt-2 tracking-tighter text-white">{title}</h2>
-  </div>
-));
-SectionHeading.displayName = 'SectionHeading';
-
-const ReelHolder = memo(({ videoId }: { videoId: string }) => (
-  <div className="relative group aspect-[9/16] w-full max-w-[300px] mx-auto rounded-[2.5rem] overflow-hidden border border-[#FFE600]/30 shadow-[0_0_20px_rgba(255,230,0,0.15)] bg-[#050505]">
-    <iframe
-      className="w-full h-full object-cover"
-      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`}
-      title="YouTube Reel"
-      allow="autoplay; encrypted-media"
-      frameBorder="0"
-    />
-  </div>
-));
-ReelHolder.displayName = 'ReelHolder';
 
 // ---------------------------------------------------------------------------
 // Views
@@ -338,7 +494,7 @@ const HomePage = memo(({ setPage }: { setPage: (p: string) => void }) => (
     </div>
 
     <div className="mb-24">
-      <SectionHeading subtitle="Motion Showcase" title="Featured Reels" />
+      <SectionHeading subtitle="Motion Showcase" title="Featured SaaS" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {REEL_IDS.map(id => <ReelHolder key={id} videoId={id} />)}
       </div>
@@ -367,22 +523,18 @@ HomePage.displayName = 'HomePage';
 
 const ServicesPage = memo(() => {
   const [activeAudioId, setActiveAudioId] = useState<number | null>(null);
-  const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({});
+  const [durations, setDurations] = useState<{ [key: number]: string }>({});
 
   const toggleAudio = (id: number) => {
-    if (activeAudioId !== null && activeAudioId !== id && audioRefs.current[activeAudioId]) {
-      audioRefs.current[activeAudioId]?.pause();
-    }
+    setActiveAudioId(prev => (prev === id ? null : id));
+  };
 
-    const currentAudio = audioRefs.current[id];
-    if (currentAudio) {
-      if (activeAudioId === id) {
-        currentAudio.pause();
-        setActiveAudioId(null);
-      } else {
-        currentAudio.play().catch(() => console.log("Audio play blocked."));
-        setActiveAudioId(id);
-      }
+  const handleMetadataLoaded = (id: number, e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
+    const durationSec = e.currentTarget.duration;
+    if (durationSec && !isNaN(durationSec)) {
+      const minutes = Math.floor(durationSec / 60);
+      const seconds = Math.floor(durationSec % 60).toString().padStart(2, '0');
+      setDurations(prev => ({ ...prev, [id]: `${minutes}:${seconds}` }));
     }
   };
 
@@ -390,7 +542,6 @@ const ServicesPage = memo(() => {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-36 pb-32 px-6 max-w-7xl mx-auto text-white">
       <SectionHeading subtitle="Services" title="Production Capabilities" />
       
-      {/* Services List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
         {SERVICES_DATA.map(s => (
           <GlassCard key={s.id} className="p-8">
@@ -408,7 +559,6 @@ const ServicesPage = memo(() => {
         ))}
       </div>
 
-      {/* SaaS Demos */}
       <div className="mb-20">
         <SectionHeading subtitle="Demos" title="SaaS Screen Captures" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -434,33 +584,19 @@ const ServicesPage = memo(() => {
         </div>
       </div>
 
-      {/* Voice Over Showcase */}
       <div>
         <SectionHeading subtitle="Talent" title="Voice Over Soundboard" />
         <div className="space-y-4">
-          {VOICEOVER_SAMPLES.map(sample => {
-            const isPlaying = activeAudioId === sample.id;
-            return (
-              <GlassCard key={sample.id} className="p-6 flex items-center justify-between">
-                <audio ref={el => { audioRefs.current[sample.id] = el; }} src={sample.audioUrl} onEnded={() => setActiveAudioId(null)} />
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => toggleAudio(sample.id)}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                      isPlaying ? 'bg-[#FFE600] text-black shadow-[0_0_15px_rgba(255,230,0,0.5)]' : 'bg-white/10 text-white hover:bg-[#FFE600] hover:text-black'
-                    }`}
-                  >
-                    {isPlaying ? <Volume2 size={20} className="animate-pulse" /> : <Play size={20} className="ml-0.5" />}
-                  </button>
-                  <div>
-                    <h4 className="font-bold text-white text-base">{sample.title}</h4>
-                    <span className="text-xs text-[#FFE600]">{sample.style}</span>
-                  </div>
-                </div>
-                <span className="text-xs text-gray-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">{sample.duration}</span>
-              </GlassCard>
-            );
-          })}
+          {VOICEOVER_SAMPLES.map(sample => (
+            <VoiceoverItem
+              key={sample.id}
+              sample={sample}
+              activeAudioId={activeAudioId}
+              toggleAudio={toggleAudio}
+              handleMetadataLoaded={handleMetadataLoaded}
+              duration={durations[sample.id] || sample.defaultDuration}
+            />
+          ))}
         </div>
       </div>
     </motion.div>
@@ -539,16 +675,15 @@ ContactPage.displayName = 'ContactPage';
 // ---------------------------------------------------------------------------
 // Root App Entry Point
 // ---------------------------------------------------------------------------
+
 export default function App() {
   const [page, setPage] = useState('home');
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans relative overflow-x-hidden selection:bg-[#FFE600] selection:text-black">
       
-      {/* Top Glossy Navbar */}
       <GlossyTopBar page={page} setPage={setPage} />
 
-      {/* Active Page View */}
       <main>
         <AnimatePresence mode="wait">
           {page === 'home' && <HomePage key="home" setPage={setPage} />}
@@ -558,7 +693,6 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* Floating Bottom Glossy Social Hub */}
       <BottomGlassSocialHub />
 
     </div>
